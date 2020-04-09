@@ -1,0 +1,21 @@
+{
+    "itemgroups": [
+        "basics",
+        "beverages",
+        "fastfood",
+        "grains",
+        "meat",
+        "toppings",
+        "vegetables"
+    ],
+    "containertypes": [
+        "can",
+        "frozen",
+        "jar"
+    ],
+    "locations": [
+        "freezer",
+        "fridge",
+        "pantry"
+    ]
+}

@@ -1,0 +1,267 @@
+{
+    "basics": [
+        {
+            "name_da": "Ketjap",
+            "name_en": "Ketjap",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Køkkenrulle",
+            "name_en": "Paper towel",
+            "minimum_limit": 2
+        },
+        {
+            "name_da": "Mornaysauce",
+            "name_en": "Mornay sauce",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Madolie",
+            "name_en": "Frying oil",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Opvaskemiddel",
+            "name_en": "Dishwashing soap",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Sæbe",
+            "name_en": "Soap",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Sambal",
+            "name_en": "Sambal",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Shampoo",
+            "name_en": "Shampoo",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Sødetabletter",
+            "name_en": "Sweeteners",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Soyasauce",
+            "name_en": "Soy sauce",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Stegemargarine",
+            "name_en": "Frying margarine",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Tændstikker",
+            "name_en": "Matches",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Tandpasta",
+            "name_en": "Toothpaste",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Teriyaki",
+            "name_en": "Teriyaki",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Toiletpapir",
+            "name_en": "Toilet paper",
+            "minimum_limit": 6
+        },
+        {
+            "name_da": "Æg",
+            "name_en": "Egg",
+            "minimum_limit": 1
+        }
+    ],
+    "beverages": [
+        {
+            "name_da": "Havredrik",
+            "name_en": "Oatmilk",
+            "minimum_limit": 2
+        },
+        {
+            "name_da": "Juice",
+            "name_en": "Juice",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Kaffe",
+            "name_en": "Coffee",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "The",
+            "name_en": "Tea",
+            "minimum_limit": 1
+        }
+    ],
+    "fastfood": [
+        {
+            "name_da": "Færdigretter",
+            "name_en": "TV dinners",
+            "minimum_limit": 2,
+            "standard_duration": 180
+        }
+    ],
+    "grains": [
+        {
+            "name_da": "Brød",
+            "name_en": "Bread",
+            "minimum_limit": 2
+        },
+        {
+            "name_da": "Chocolate müsli",
+            "name_en": "Cereal",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Kartofler",
+            "name_en": "Potatoes",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Lasagneplader",
+            "name_en": "Lasagne sheets",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Nudler",
+            "name_en": "Noodles",
+            "minimum_limit": 2
+        },
+        {
+            "name_da": "Pasta",
+            "name_en": "Pasta",
+            "minimum_limit": 2
+        },
+        {
+            "name_da": "Ris",
+            "name_en": "Rice",
+            "minimum_limit": 2
+        },
+        {
+            "name_da": "Rundstykker",
+            "name_en": "Breadrolls",
+            "minimum_limit": 1,
+            "container_type": "Frozen",
+            "standard_duration": 180
+        }
+    ],
+    "meat": [
+        {
+            "name_da": "Fisk",
+            "name_en": "Fish",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Hakkekød",
+            "name_en": "Mince meat",
+            "minimum_limit": 2
+        },
+        {
+            "name_da": "Kyllingefilet",
+            "name_en": "Chicken fillet",
+            "minimum_limit": 2
+        }
+    ],
+    "toppings": [
+        {
+            "name_da": "Makrel i tomat",
+            "name_en": "Mackrel in tomato sauce",
+            "minimum_limit": 2,
+            "container_type": "Can",
+            "standard_duration": 180
+        },
+        {
+            "name_da": "Ost",
+            "name_en": "Cheese",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Peanutbutter",
+            "name_en": "Peanut butter",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Smør",
+            "name_en": "Butter",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Tun i vand",
+            "name_en": "Tuna",
+            "minimum_limit": 2,
+            "container_type": "Can",
+            "standard_duration": 180
+        }
+    ],
+    "vegetables": [
+        {
+            "name_da": "Ananas",
+            "name_en": "Pineapple",
+            "minimum_limit": 1,
+            "container_type": "Can",
+            "standard_duration": 180
+        },
+        {
+            "name_da": "Grøntsager",
+            "name_en": "Vegetables",
+            "minimum_limit": 2,
+            "container_type": "Frozen",
+            "standard_duration": 180
+        },
+        {
+            "name_da": "Hakket tomat",
+            "name_en": "Chopped tomatoes",
+            "minimum_limit": 2,
+            "container_type": "Can",
+            "standard_duration": 180
+        },
+        {
+            "name_da": "Hvidløg",
+            "name_en": "Garlic",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Løg",
+            "name_en": "Onion",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Rødbeder",
+            "name_en": "Red beets",
+            "minimum_limit": 1,
+            "container_type": "Can",
+            "standard_duration": 180
+        },
+        {
+            "name_da": "Rødkål",
+            "name_en": "Red cabbage",
+            "minimum_limit": 1,
+            "container_type": "Can",
+            "standard_duration": 180
+        },
+        {
+            "name_da": "Tomatpure",
+            "name_en": "Tomato puree",
+            "minimum_limit": 2,
+            "container_type": "Can",
+            "standard_duration": 180
+        },
+        {
+            "name_da": "Wokgrøntsager",
+            "name_en": "Wok vegetables",
+            "minimum_limit": 2,
+            "container_type": "Frozen",
+            "standard_duration": 180
+        }
+    ]
+}
