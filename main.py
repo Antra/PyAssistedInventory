@@ -509,6 +509,10 @@ def interactivate_list_stock(session):
         elif ch.upper() == 'L':
             # Listing all items (omitting empty rows)
             stock_contents = list_stock(session, exclude_empty=True)
+
+            if len(stock_contents) == 0:
+                print("The stock is currently empty!")
+
             for row in stock_contents:
                 print(row.get_row(prefix='  '))
 
@@ -777,8 +781,9 @@ if __name__ == '__main__':
     # Read the minimum limits from the JSON and add to DB
     _quick_init(session, 'raw_data.json')
 
+    # TODO: Turn this into proper tests
     # debug(session)
-    debug_stock(session)
+    # debug_stock(session)
 
     # Normal operation
     logging.info('Launching the main menu for the first time')
