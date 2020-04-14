@@ -123,13 +123,19 @@ def _quick_init(session, file):
                 if item.get('container_type'):
                     type_id = session.query(ContainerType.id).filter(
                         func.upper(ContainerType.name) == item['container_type'].upper()).scalar()
-                new_item = Item(name=item['name_en'],
-                                name_dk=item['name_da'],
-                                min_limit=item['minimum_limit'],
-                                group_id=group_id,
-                                type_id=type_id,
-                                standard_duration=item.get('standard_duration', None))
-                session.add(new_item)
+                result = _create(session,
+                                 Item,
+                                 name=item['name_en'].capitalize(),
+                                 name_dk=item['name_da'].capitalize(),
+                                 min_limit=item['minimum_limit'],
+                                 group_id=group_id,
+                                 type_id=type_id,
+                                 standard_duration=item.get('standard_duration', None))
+
+                logging.info(
+                    f"Item '{result[0].name}' read from definitions file. Was it created now? '{result[1]}' (otherwise it existed already and just had its values updated)")
+                logging.debug(
+                    f"The item was read from '{file}', this is the row itself: {result[0]}")
         session.commit()
 
 
