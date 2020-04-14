@@ -41,7 +41,9 @@ def setup(basedir=''):
     logdir = os.path.join(basedir, 'logs')
     if not os.path.exists(logdir):
         os.mkdir('logs')
-    loglevel = logging.DEBUG  # NOTSET | DEBUG | INFO | WARNING | ERROR | CRITICAL
+    loglevel = os.environ.get('LOG_LEVEL', 'INFO').upper()
+    if loglevel.upper() not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+        loglevel = logging.INFO
     logging.basicConfig(
         # filename=logdir + '/logfile.log',
         # filemode='a',
@@ -53,6 +55,7 @@ def setup(basedir=''):
             backupCount=10)]
     )
     logging.info('** Program started!')
+    logging.critical(f"Loglevel set to {loglevel}")
 
 
 def db_init():
