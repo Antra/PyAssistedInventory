@@ -236,6 +236,49 @@ def add_to_stock(session, item_id, location_id, portions, expiration_date=None):
     return result
 
 
+def _confirm_stock(session, item_id):
+    '''
+    Helper method to confirm the number of items after adding/removing items
+
+    It gathers the total count in stock and asks the user to confirm; use blank to skip (permit whatever value is there).
+
+    Parameters:
+        item_id (int): The ID of the item that was added/removed from stock
+
+    Returns:
+        total_count (int): The updated storage rows for that item
+    '''
+    # TODO: Update this to permit "item_id == None" and then it'll do a full stock confirmation routine?
+
+    # get the item rows in question
+    current_contents = list_stock(session, item_id=item_id, exclude_empty=True)
+
+    current_count = 0
+    for row in current_contents:
+        current_count += row.portions
+
+    updated_count = get_input_int(f"There are currently {current_count} in stock, does that seem right? Add the correct total number here (Blank to skip):",
+                                  lower_bound=0,
+                                  accept_blank=True)
+
+    if updated_count == '' or updated_count == current_count:
+        # User passed or confirmed
+        pass
+    else:
+        # User corrected
+        # TODO: If we start using the expiration dates, this logic has to be strengthened - but for now we'll set all older rows to 0 and put the updated quantity in the most recent row
+        for row in current_contents:
+            row.portions = 0
+            logging.debug(f"Updated storage row {row} to 0 portions in stock")
+
+        current_contents[-1].portions = updated_count
+        logging.debug(
+            f"Updated storage row {row} to have {updated_count} portions in stock")
+        session.flush()
+
+    return current_contents
+
+
 def list_items(session, model):
     '''Generator that yields the items of type model'''
 
@@ -424,6 +467,14 @@ def interactivate_list_stock(session):
             result = add_to_stock(session, item_id=item_id,
                                   location_id=location_id,
                                   portions=portions)
+            logging.info(f"Added {result} to stock")
+
+        session.flush()
+
+        # Ask the user to confirm the stock - or update it in accordance with the visual inspection done
+        _confirm_stock(session, item_id=item_id)
+
+        session.commit()
 
     elif ch.upper() == 'L':
         # Listing menu
@@ -498,17 +549,8 @@ def interactivate_list_stock(session):
             session.flush()
 
         session.commit()
-        stmt = session.query(Storage.item_id, func.count(
-            '*').label('stored_count')).group_by(Storage.item_id).subquery()
 
-        updated_count = session.query(Storage).filter(
-            Storage.item_id == item_id).group_by(Storage.item_id).scalar()
-
-        print(f"Done! There are now {updated_count.portions} left!")
-
-        pause()
-
-        # return menu(session)
+        _confirm_stock(session, item_id=item_id)
 
     else:
         # Quit -- back to menu
@@ -536,18 +578,22 @@ def interactive_add_update_item(session):
                        max_length=1, accept_string='CUQ')
 
     if ch.upper() == 'C':
-        # Create
+        # Create item in item group
         name = get_input_str("What is the name of the item?").capitalize()
         if name:
             logging.info(f'Creating item {name} in category: \'{group_name}\'')
             item = add_item(session, name=name, group=group_name)[0]
 
+        # then proceed with the shared steps
+
     elif ch.upper() == 'U':
-        # Update
+        # Update item values (e.g. min_limit)
         item_id = get_input_int("Which item ID do you wish to update? (Blank to cancel)",
                                 acceptable_values=valid_ids, accept_blank=True)
         if item_id in valid_ids:
             item = _create(session, Item, id=item_id)[0]
+
+        # then proceed with the shared steps
 
     else:
         # Quit -- back to menu
@@ -671,7 +717,8 @@ def deficit_stock(session):
         if item.min_limit > count:
             deficits.append((item.name, item.id, item.min_limit - count))
         else:
-            print(f"skipping this!!!{item} - {count}")
+            logging.debug(
+                f"Omitting {item} with {count} portions left from the deficit list")
 
     return deficits
 
