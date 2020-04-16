@@ -1,0 +1,90 @@
+{
+    "basics": [
+        {
+            "name_da": "Ketjap",
+            "name_en": "Ketjap",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Madolie",
+            "name_en": "Frying oil",
+            "minimum_limit": 1
+        }
+    ],
+    "beverages": [
+        {
+            "name_da": "Juice",
+            "name_en": "Juice",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Kaffe",
+            "name_en": "Coffee",
+            "minimum_limit": 1
+        }
+    ],
+    "fastfood": [
+        {
+            "name_da": "Færdigretter",
+            "name_en": "TV dinners",
+            "minimum_limit": 2,
+            "standard_duration": 180
+        }
+    ],
+    "grains": [
+        {
+            "name_da": "Brød",
+            "name_en": "Bread",
+            "minimum_limit": 2
+        },
+        {
+            "name_da": "Rundstykker",
+            "name_en": "Breadrolls",
+            "minimum_limit": 1,
+            "container_type": "Frozen",
+            "standard_duration": 180
+        }
+    ],
+    "meat": [
+        {
+            "name_da": "Fisk",
+            "name_en": "Fish",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Hakkekød",
+            "name_en": "Mince meat",
+            "minimum_limit": 2
+        }
+    ],
+    "toppings": [
+        {
+            "name_da": "Ost",
+            "name_en": "Cheese",
+            "minimum_limit": 1
+        },
+        {
+            "name_da": "Tun i vand",
+            "name_en": "Tuna",
+            "minimum_limit": 2,
+            "container_type": "Can",
+            "standard_duration": 180
+        }
+    ],
+    "vegetables": [
+        {
+            "name_da": "Ananas",
+            "name_en": "Pineapple",
+            "minimum_limit": 1,
+            "container_type": "Can",
+            "standard_duration": 180
+        },
+        {
+            "name_da": "Grøntsager",
+            "name_en": "Vegetables",
+            "minimum_limit": 2,
+            "container_type": "Frozen",
+            "standard_duration": 180
+        }
+    ]
+}
