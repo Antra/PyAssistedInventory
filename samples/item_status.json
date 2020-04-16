@@ -1,0 +1,106 @@
+[
+    {
+        "item_id": 1,
+        "name": "Ketjap",
+        "stock_count": 0,
+        "itemgroup": "Basics",
+        "min_limit": 1,
+        "standard_duration": null
+    },
+    {
+        "item_id": 4,
+        "name": "Frying oil",
+        "stock_count": 1,
+        "itemgroup": "Basics",
+        "min_limit": 1,
+        "standard_duration": null
+    },
+    {
+        "item_id": 18,
+        "name": "Juice",
+        "stock_count": 0,
+        "itemgroup": "Beverages",
+        "min_limit": 1,
+        "standard_duration": null
+    },
+    {
+        "item_id": 19,
+        "name": "Coffee",
+        "stock_count": 0,
+        "itemgroup": "Beverages",
+        "min_limit": 1,
+        "standard_duration": null
+    },
+    {
+        "item_id": 21,
+        "name": "Tv dinners",
+        "stock_count": 13,
+        "itemgroup": "Fastfood",
+        "min_limit": 2,
+        "standard_duration": 180
+    },
+    {
+        "item_id": 22,
+        "name": "Bread",
+        "stock_count": 0,
+        "itemgroup": "Grains",
+        "min_limit": 2,
+        "standard_duration": null
+    },
+    {
+        "item_id": 29,
+        "name": "Breadrolls",
+        "stock_count": 0,
+        "itemgroup": "Grains",
+        "min_limit": 1,
+        "standard_duration": 180
+    },
+    {
+        "item_id": 30,
+        "name": "Fish",
+        "stock_count": 0,
+        "itemgroup": "Meat",
+        "min_limit": 1,
+        "standard_duration": null
+    },
+    {
+        "item_id": 31,
+        "name": "Mince meat",
+        "stock_count": 0,
+        "itemgroup": "Meat",
+        "min_limit": 2,
+        "standard_duration": null
+    },
+    {
+        "item_id": 34,
+        "name": "Cheese",
+        "stock_count": 0,
+        "itemgroup": "Toppings",
+        "min_limit": 1,
+        "standard_duration": null
+    },
+    {
+        "item_id": 37,
+        "name": "Tuna",
+        "stock_count": 0,
+        "itemgroup": "Toppings",
+        "min_limit": 2,
+        "standard_duration": 180
+    },
+    {
+        "item_id": 38,
+        "name": "Pineapple",
+        "stock_count": 0,
+        "itemgroup": "Vegetables",
+        "min_limit": 1,
+        "standard_duration": 180
+    },
+    {
+        "item_id": 39,
+        "name": "Vegetables",
+        "stock_count": 0,
+        "itemgroup": "Vegetables",
+        "min_limit": 2,
+        "standard_duration": 180
+    }
+]

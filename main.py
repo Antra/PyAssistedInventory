@@ -37,7 +37,6 @@ def setup(basedir=''):
             backupCount=10)]
     )
     logging.info('** Program started!')
-    logging.critical(f"Loglevel set to {loglevel}")
 
 
 def db_init():
@@ -83,6 +82,7 @@ def _read_defaults(session, file):
 
 
 def clear_screen():
+    '''Uses the OS system commands to clear output screen in the appropriate manner for that OS'''
     # for windows
     if os.name == 'nt':
         return os.system('cls')
@@ -98,34 +98,131 @@ def pause():
 
 def _quick_init(session, file):
     '''This reads a JSON file, supporting function to get default values added to the DB'''
-    with open(file, encoding='utf-8') as json_file:
-        data = json.load(json_file)
-        for group in data.keys():
-            group_id = session.query(ItemGroup.id).filter(
-                func.upper(ItemGroup.name) == group.upper()).scalar()
-            for item in data[group]:
-                type_id = None
-                if item.get('container_type'):
-                    type_id = session.query(ContainerType.id).filter(
-                        func.upper(ContainerType.name) == item['container_type'].upper()).scalar()
-                result = _create(session,
-                                 Item,
-                                 name=item['name_en'].capitalize(),
-                                 name_dk=item['name_da'].capitalize(),
-                                 min_limit=item['minimum_limit'],
-                                 group_id=group_id,
-                                 type_id=type_id,
-                                 standard_duration=item.get('standard_duration', None))
+    try:
+        with open(file, encoding='utf-8') as json_file:
+            data = json.load(json_file)
+    except FileNotFoundError as e:
+        logging.error(f"Error opening {file}! Error message '{e}'")
+        return None
 
-                logging.info(
-                    f"Item '{result[0].name}' read from definitions file. Was it created now? '{result[1]}' (otherwise it existed already and just had its values updated)")
-                logging.debug(
-                    f"The item was read from '{file}', this is the row itself: {result[0]}")
-        session.commit()
+    for group in data.keys():
+        group_id = session.query(ItemGroup.id).filter(
+            func.upper(ItemGroup.name) == group.upper()).scalar()
+        for item in data[group]:
+            type_id = None
+            if item.get('container_type'):
+                type_id = session.query(ContainerType.id).filter(
+                    func.upper(ContainerType.name) == item['container_type'].upper()).scalar()
+            result = _create(session,
+                             Item,
+                             name=item['name_en'].capitalize(),
+                             name_dk=item['name_da'].capitalize(),
+                             min_limit=item['minimum_limit'],
+                             group_id=group_id,
+                             type_id=type_id,
+                             standard_duration=item.get('standard_duration', None))
+
+            logging.info(
+                f"Item '{result[0].name}' read from definitions file. Was it created now? '{result[1]}' (otherwise it existed already)")
+            logging.debug(
+                f"The item was read from '{file}', this is the row itself: {result[0]}")
+    session.commit()
+
+
+def _item_export(session):
+    '''
+    Helper function to export the items in the DB with current counts
+
+    Produces a JSON with current amounts and minimum limits (to support read in and ad hoc updates)
+    '''
+    # TODO: Should it be possible to do a partial export? For now, just take the whole shebang
+
+    # Get all the items with their counts, including items not in stock
+    items = list_items_with_stock_count(session,
+                                        item_id=None,
+                                        exclude_empty=False)
+
+    # Then generate the JSON layout
+    data = []
+    for item, count in items:
+        data.append(
+            {
+                "item_id": item.id,
+                "name": item.name,
+                "stock_count": count,
+                "itemgroup": item.itemgroup.name,
+                "min_limit": item.min_limit,
+                "standard_duration": item.standard_duration
+            }
+        )
+
+    # And write it as UTF-8 with pretty formatting
+    if data:
+        with open('item_status.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        logging.info(
+            "Created 'item_status.json' with current items and stock level")
+
+    return None
+
+
+def _item_import(session, file):
+    '''
+    Helper function to import JSON and update the Item values accordingly -- both stock count and minimum limits
+
+    The file is expected to be in the same format as produced by '_item_export()'.
+    Renames the file to avoid multiple imports of the data data
+
+    Parameters:
+        file (str): the name of the JSON file with the items
+    '''
+
+    # The given file should be in the main directory and will be renamed to *.bak after import
+    try:
+        with open(file, encoding='utf-8') as json_file:
+            data = json.load(json_file)
+    except FileNotFoundError as e:
+        logging.error(f"Error opening {file}! Error message '{e}'")
+        return None
+
+    # loop the items in the file
+    for record in data:
+        item_id = record.get('item_id', None)
+        stock_count = record.get('stock_count', 0)
+        min_limit = record.get('min_limit', 0)
+        std_duration = record.get('standard_duration', None)
+
+        item = _create(session, Item, id=item_id)[0]
+
+        logging.debug(
+            f"Updating item {item.name} (id: {item.id}) with MinLimit: '{min_limit}' and StdDuration: '{std_duration}'")
+
+        item.set_min(min_limit)
+        item.set_std_dur(std_duration)
+
+        current_stock = _get_portions_by_item(session, item_id=item_id)
+
+        if stock_count != current_stock:
+            logging.debug(
+                "Updating the stored item count based on the imported file")
+            current_contents = _reset_item_portions(session,
+                                                    item_id=item_id,
+                                                    new_count=stock_count)
+
+    # then rename the file
+    backup_file = file+'.bak'
+    if os.path.exists(backup_file):
+        logging.debug(
+            f"It looks like there is already a backed up file {backup_file}, so deleting it first")
+        os.remove(backup_file)
+    logging.debug(
+        f"Renaming the imported file ({file}) to {backup_file}, so it won't be imported again")
+    os.rename(file, backup_file)
 
 
 def teardown(session):
     '''Close the setup gracefully'''
+    _item_export(session)
     session.close()
     logging.info('** Program closing down!')
 
@@ -227,6 +324,49 @@ def add_to_stock(session, item_id, location_id, portions, expiration_date=None):
     return result
 
 
+def _get_portions_by_item(session, item_id):
+    '''
+    Helper method to return number of portions in stock for a given item
+
+    Parameters:
+        item_id (int): The ID of the item to find storage rows for
+
+    Returns:
+        total_portions (int): The total number of portions across all storage rows for that item
+    '''
+
+    stock_rows = list_stock(session, item_id=item_id, exclude_empty=True)
+    total_portions = 0
+    for row in stock_rows:
+        total_portions += row.portions
+
+    return total_portions
+
+
+def _reset_item_portions(session, item_id, new_count):
+    '''
+    Helper method to reset the number of portions in stock for a given item (which is already in stock)
+
+    Sets all storage rows to 0 and then updates the newest storage row to 'new_count'
+
+    Parameters:
+        item_id (int): The ID of the item to reset for
+        new_count (int): The new number of portions to
+    Returns:
+        The updated storage rows for that item
+    '''
+    current_contents = list_stock(session, item_id=item_id, exclude_empty=True)
+    for row in current_contents:
+        row.portions = 0
+        logging.debug(f"Updated storage row {row} to 0 portions in stock")
+        current_contents[-1].portions = updated_count
+        logging.debug(
+            f"Updated storage row {row} to have {updated_count} portions in stock")
+        session.flush()
+
+    return current_contents
+
+
 def _confirm_stock(session, item_id):
     '''
     Helper method to confirm the number of items after adding/removing items
@@ -237,16 +377,12 @@ def _confirm_stock(session, item_id):
         item_id (int): The ID of the item that was added/removed from stock
 
     Returns:
-        total_count (int): The updated storage rows for that item
+        total_count (int): The total number of portions stored for that item
     '''
     # TODO: Update this to permit "item_id == None" and then it'll do a full stock confirmation routine?
 
-    # get the item rows in question
-    current_contents = list_stock(session, item_id=item_id, exclude_empty=True)
-
-    current_count = 0
-    for row in current_contents:
-        current_count += row.portions
+    # How many items are in stock?
+    current_count = _get_portions_by_item(session, item_id=item_id)
 
     updated_count = get_input_int(f"There are currently {current_count} in stock, does that seem right? Add the correct total number here (Blank to skip):",
                                   lower_bound=0,
@@ -258,16 +394,13 @@ def _confirm_stock(session, item_id):
     else:
         # User corrected
         # TODO: If we start using the expiration dates, this logic has to be strengthened - but for now we'll set all older rows to 0 and put the updated quantity in the most recent row
-        for row in current_contents:
-            row.portions = 0
-            logging.debug(f"Updated storage row {row} to 0 portions in stock")
+        current_contents = _reset_item_portions(session,
+                                                item_id=item_id,
+                                                new_count=updated_count)
 
-        current_contents[-1].portions = updated_count
-        logging.debug(
-            f"Updated storage row {row} to have {updated_count} portions in stock")
-        session.flush()
+    current_count = _get_portions_by_item(session, item_id=item_id)
 
-    return current_contents
+    return current_count
 
 
 def list_items(session, model):
@@ -286,7 +419,7 @@ def _get_items_by_group(session, group_id):
 
 def _purge_zero_stock(session):
     '''Prune the zero items from the stock'''
-    result = session.query(Storage).filter(Storage.portions == 0).delete()
+    result = session.query(Storage).filter(Storage.portions <= 0).delete()
     logging.info(
         f"Database clean-up. Clearing zero portion rows from the storage database, removed {result} rows.")
     return None
@@ -316,6 +449,42 @@ def list_stock(session, item_id=None, exclude_empty=True):
         storage_rows = session.query(Storage).all()
 
     return storage_rows
+
+
+def list_items_with_stock_count(session, item_id=None, exclude_empty=True):
+    '''Helper function to list all items and their current number in stock
+
+    Parameter:
+        item_id (int): Check only for a specific item?
+        exclude_empty (boolean): Whether to exclude items with 0 or less in stock
+
+    Returns:
+        list of tuples (Item, stockCount)
+    '''
+
+    stmt = session.query(Storage.portions, Storage.item_id, func.sum(
+        Storage.portions).label('stored_count')).group_by(Storage.item_id).subquery()
+
+    item_list = []
+
+    if item_id and exclude_empty:
+        # get only for that specific item and omit items not in stock
+        for item, count in session.query(Item, coalesce(stmt.c.stored_count, 0)).outerjoin(stmt, Item.id == stmt.c.item_id).filter(Item.id == item_id).filter(stmt.c.stored_count > 0).order_by(Item.id):
+            item_list.append((item, count))
+    elif item_id:
+        # get only for that specific item regardless of whether it is in stock
+        for item, count in session.query(Item, coalesce(stmt.c.stored_count, 0)).outerjoin(stmt, Item.id == stmt.c.item_id).filter(Item.id == item_id):
+            item_list.append((item, count))
+    elif exclude_empty:
+        # get all items except the ones that are not in stock
+        for item, count in session.query(Item, coalesce(stmt.c.stored_count, 0)).outerjoin(stmt, Item.id == stmt.c.item_id).filter(stmt.c.stored_count > 0).order_by(Item.id):
+            item_list.append((item, count))
+    else:
+        # get all items regardless of whether it is in stock
+        for item, count in session.query(Item, coalesce(stmt.c.stored_count, 0)).outerjoin(stmt, Item.id == stmt.c.item_id).order_by(Item.id):
+            item_list.append((item, count))
+
+    return item_list
 
 
 def get_input_str(message, max_length=None, accept_string=None, valid_date=False, accept_blank=False):
@@ -701,14 +870,10 @@ def deficit_stock(session):
     # Begin by removing any zero-rows from Storage
     _purge_zero_stock(session)
 
-    # Next create a subquery with "stored_count" for each item
-    stmt = session.query(Storage.item_id, func.count(
-        '*').label('stored_count')).group_by(Storage.item_id).subquery()
-
     deficits = []
 
-    # Then get all the items with their stored_counts:
-    for item, count in session.query(Item, coalesce(stmt.c.stored_count, 0)).outerjoin(stmt, Item.id == stmt.c.item_id).order_by(Item.id):
+    # Then build the deficits list by looking at all items with their current count (including the items without anything in storage)
+    for item, count in list_items_with_stock_count(session, item_id=None, exclude_empty=False):
         if item.min_limit > count:
             deficits.append((item.name, item.id, item.min_limit - count))
         else:
@@ -747,16 +912,39 @@ def exec_menu(session, choice, menu_actions):
             globals()[sys._getframe().f_back.f_code.co_name](session)
 
 
+def ad_hoc_import(session):
+    '''The interactive session to manually import a JSON with item data to update with'''
+
+    print("Mass-update items")
+    print("This is intended for ad hoc updates of one or more item values - for instance when doing a stock re-count or mass-changing minimum limits")
+    print("\n!!! Place the item JSON file in the root folder first before proceeding !!!\n")
+
+    filename = get_input_str("What is the filename of the JSON file with updated item values? (Blank to cancel)",
+                             accept_blank=True)
+    if filename == '':
+        return menu(session)
+    else:
+        logging.info(f"Starting adhoc item update from file '{filename}'")
+        _item_import(session, filename)
+
+        print("Item values updated and file renamed to '.bak'.")
+        pause()
+
+    return menu(session)
+
+
 def menu(session):
     clear_screen()
     menu_actions = {
         '1': interactive_add_update_item,
         '2': interactivate_list_stock,
+        '3': ad_hoc_import,
         '0': teardown
     }
     print("Welcome to Python Assisted Inventory (PAI)!")
     print("1) Add or update items")
     print("2) List or update stock")
+    print("3) Mass-update items")
     print("\n0) Quit")
     choice = get_input_int("Please choose what you would like to do?",
                            lower_bound=0,
@@ -769,8 +957,9 @@ if __name__ == '__main__':
     setup(basedir)
     session = db_init()
 
-    # Read the minimum limits from the JSON and add to DB
-    _quick_init(session, 'raw_data.json')
+    # Read the minimum limits from the JSON and add to DB - debug start, TODO: Improve this e.g. via Admin submenu
+    #_quick_init(session, 'raw_data.json')
+    _item_export(session)
 
     # TODO: Turn this into proper tests
     # debug(session)
