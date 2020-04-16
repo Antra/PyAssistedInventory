@@ -16,24 +16,6 @@ load_dotenv(os.path.join(basedir, '.env'))
 Session = sessionmaker()
 
 
-# TODO:
-# add item with barcode (NB, item may exist even if barcode doesn't! -- better to not allow and to associate barcodes later?)
-# associate barcode to item
-
-# Done:
-# add item
-# get item
-# get item by item group
-# add/update minimum limit to item
-# remove minimum limit from item
-# add item to stock
-# add item to stock with expiry date
-# get list of items in stock
-# get list of expired items in stock
-# get list of items with minimum limits
-# Add function to prune StorageDB; clean-out rows with 0 or lower number of portions
-# remove item from stock
-
 def setup(basedir=''):
     '''
     Set things up for the application to run and start logging in '/logs'
